@@ -5,6 +5,17 @@ import { Download } from 'lucide-react';
 const FOLDER_ID = '1rvEOVGK93P2eYwnOO2FFB-_fpndCTqVo';
 const MASTER_PASSWORD = 'Multatuli19';
 
+const funnyQuotes = [
+  '"Seberat apapun beban hidup, masih lebih berat perut habis kumpul keluarga." 🦖',
+  '"Keluarga itu seperti sinyal WiFi, kadang putus-nyambung tapi kita sangat membutuhkannya." 📶',
+  '"Jangan lupa senyum! Karena kalau cemberut nanti dikira T-Rex kelaparan." 🦖🍖',
+  '"Harta yang paling berharga adalah keluarga, apalagi kalau lagi ditraktir." 💸',
+  '"Masa lalu biarlah berlalu, kecuali foto aib keluarga, itu wajib diabadikan!" 📸😂',
+  '"Diet keluarga: Besok mulai, hari ini kita habiskan masakan Oma dulu." 🥘',
+  '"Kekuatan super seorang ibu: bisa menemukan barang hilang dalam 5 detik." 🦸‍♀️',
+  '"Semarah-marahnya orang tua, tetap ujung-ujungnya nanya \'Udah makan belum?\'" 🍚'
+];
+
 const dictionary = {
   id: {
       subtitle: "Arsip Memori Keluarga",
@@ -86,6 +97,7 @@ export default function App() {
   const [lang, setLang] = useState('id');
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
   const [fontSize, setFontSize] = useState('text-base');
+  const [randomQuote] = useState(() => funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)]);
   
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -417,9 +429,15 @@ export default function App() {
             )}
           </main>
 
-          <footer className="bg-white dark:bg-slate-900 border-t border-blue-50 dark:border-slate-800/80 transition-colors duration-300 py-6 mt-12 text-center text-xs text-slate-400 dark:text-slate-500">
-            <p className="font-bold text-slate-500 dark:text-slate-400 mb-1 font-cute">🦕 OmaOpa Dino Memory Space 🦕</p>
-            <p>© 2026 Keluarga Besar Oma & Opa. Hak Cipta Dilindungi.</p>
+          <footer className="bg-white dark:bg-slate-900 border-t border-blue-50 dark:border-slate-800/80 transition-colors duration-300 py-8 mt-12 text-center flex flex-col items-center">
+            <div className="max-w-md px-6 py-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-2xl mb-6 relative animate-float-slow dino-shadow mx-4">
+              <span className="absolute -top-3 -left-2 text-3xl transform -rotate-12">🦕</span>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-400 font-cute italic">
+                {randomQuote}
+              </p>
+            </div>
+            <p className="font-bold text-slate-500 dark:text-slate-400 mb-1 font-cute text-sm">🦕 OmaOpa Dino Memory Space 🦕</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">© 2026 Keluarga Besar Oma & Opa. Hak Cipta Dilindungi.</p>
           </footer>
 
           {/* LIGHTBOX / DETAIL MODAL */}
