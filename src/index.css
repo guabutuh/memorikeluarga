@@ -49,6 +49,11 @@
   }
 }
 
+html {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -72,6 +77,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -105,13 +112,20 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 20px 40px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 20px 40px;
+    gap: 20px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -249,8 +263,9 @@ body {
 /* Vault/PIN Box Containers */
 .lock-container {
   max-width: 480px;
-  margin: 50px auto;
-  padding: 52px 42px;
+  width: calc(100% - 32px);
+  margin: 32px auto;
+  padding: 32px 20px;
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(35px) saturate(180%);
   -webkit-backdrop-filter: blur(35px) saturate(180%);
@@ -262,6 +277,13 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+}
+
+@media (min-width: 520px) {
+  .lock-container {
+    padding: 52px 42px;
+    margin: 50px auto;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -424,11 +446,20 @@ body {
 /* Vault Workspace Layout */
 .vault-workspace {
   max-width: 1280px;
-  margin: 32px auto;
-  padding: 0 24px 60px;
+  margin: 20px auto;
+  padding: 0 14px 60px;
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 24px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .vault-workspace {
+    padding: 0 24px 60px;
+    gap: 36px;
+    margin: 32px auto;
+  }
 }
 
 .vault-header-bar {
@@ -602,12 +633,16 @@ body {
   display: flex;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
-  padding: 10px;
+  padding: 6px;
   border-radius: var(--border-radius-lg);
-  gap: 10px;
+  gap: 6px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.filters-bar::-webkit-scrollbar { display: none; }
 
 @media (prefers-color-scheme: dark) {
   .filters-bar {
@@ -616,8 +651,8 @@ body {
 }
 
 .filter-tab {
-  flex: 1;
-  padding: 16px 12px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
   border: none;
   background: none;
   font-weight: 900;
@@ -625,8 +660,17 @@ body {
   cursor: pointer;
   color: var(--text-muted);
   text-align: center;
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .filter-tab {
+    flex: 1;
+    padding: 16px 12px;
+    font-size: 1.05rem;
+  }
 }
 
 .filter-tab:hover {

@@ -102,10 +102,15 @@ export default function App() {
   const [googleSigningIn, setGoogleSigningIn] = useState(false);
   // Note: tokenClientRef removed - now using redirect flow (mobile-friendly)
 
-  // --- Drive Photos ---
+  // --- Drive Photos (admin only, optional) ---
   const [drivePhotos, setDrivePhotos] = useState([]);
   const [driveLoading, setDriveLoading] = useState(false);
   const [driveError, setDriveError] = useState('');
+
+  // --- Public Photos (from photos.json, no login needed) ---
+  const [publicPhotos, setPublicPhotos] = useState([]);
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicError, setPublicError] = useState('');
 
   // --- Local Uploads ---
   const [localFiles, setLocalFiles] = useState([]);
@@ -174,6 +179,13 @@ export default function App() {
     }
   }, [isUnlocked, googleToken]);
 
+  // --- Auto load public photos (no login needed) on unlock ---
+  useEffect(() => {
+    if (isUnlocked) {
+      fetchPublicPhotos();
+    }
+  }, [isUnlocked]);
+
   // --- Sign in with Google (redirect flow — works on all mobile browsers) ---
   const handleGoogleSignIn = () => {
     if (!clientId) { setShowClientIdSetup(true); return; }
@@ -208,6 +220,32 @@ export default function App() {
     setClientId(id);
     setShowClientIdSetup(false);
     // No need to re-init token client — redirect flow handles it
+  };
+
+  // --- Load public photos from photos.json (no login needed) ---
+  const fetchPublicPhotos = async () => {
+    setPublicLoading(true);
+    setPublicError('');
+    try {
+      const res = await fetch('/photos.json?t=' + Date.now());
+      if (!res.ok) throw new Error('Gagal memuat daftar foto');
+      const data = await res.json();
+      const photos = (data.photos || []).map(f => ({
+        ...f,
+        id: f.id,
+        source: 'public',
+        category: f.albumName || 'LEBARAN',
+        // Public thumbnail (works because folder is shared publicly)
+        src: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1200`,
+        thumbSrc: `https://drive.google.com/thumbnail?id=${f.id}&sz=w400`,
+        driveLink: `https://drive.google.com/file/d/${f.id}/view`,
+      }));
+      setPublicPhotos(photos);
+    } catch (err) {
+      setPublicError(err.message);
+    } finally {
+      setPublicLoading(false);
+    }
   };
 
   // --- Recursively fetch files from a folder and all its subfolders ---
@@ -382,9 +420,13 @@ export default function App() {
     setLocalFiles(localFiles.filter(f => f.id !== id));
   };
 
-  // Combine photos
+  // Combine photos — publicPhotos first (no login needed), then drivePhotos (admin), then local
   const allPhotos = [
-    ...drivePhotos.map(p => ({ ...p, source: 'drive', category: p.albumName || 'LEBARAN' })),
+    ...publicPhotos,
+    // Merge drivePhotos that are not already in publicPhotos
+    ...drivePhotos
+      .filter(dp => !publicPhotos.some(pp => pp.id === dp.id))
+      .map(p => ({ ...p, source: 'drive', category: p.albumName || 'LEBARAN' })),
     ...localFiles.map(p => ({ ...p, source: 'local' }))
   ];
   const filteredPhotos = allPhotos.filter(p =>
@@ -568,9 +610,9 @@ export default function App() {
               <div>
                 <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>📸 Album Foto Keluarga Besar</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
-                  {drivePhotos.length > 0
-                    ? `${drivePhotos.length} foto dari Google Drive`
-                    : 'Login Google Drive untuk muat semua foto otomatis'}
+                  {publicLoading ? 'Memuat foto...' : allPhotos.length > 0
+                    ? `${allPhotos.length} foto tersedia`
+                    : 'Foto sedang dimuat...'}
                   {localFiles.length > 0 ? ` • ${localFiles.length} foto lokal` : ''}
                 </p>
               </div>
@@ -597,7 +639,21 @@ export default function App() {
               </div>
             </div>
 
-            {/* Drive error */}
+            {/* Public photos loading */}
+            {publicLoading && (
+              <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 12, animation: 'pulse 1.5s ease infinite' }}>📸</div>
+                <p style={{ fontWeight: 700 }}>Memuat foto keluarga...</p>
+              </div>
+            )}
+            {publicError && (
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: 14, padding: '14px 20px', marginBottom: 20 }}>
+                <span style={{ color: 'var(--danger)', fontWeight: 700, fontSize: '0.9rem' }}>⚠️ {publicError}</span>
+              </div>
+            )}
+
+            {/* Drive error (admin only) */}
             {driveError && !driveLoading && (
               <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
                 borderRadius: 14, padding: '14px 20px', marginBottom: 20, display: 'flex', gap: 12,
@@ -606,11 +662,11 @@ export default function App() {
               </div>
             )}
 
-            {/* Drive loading */}
+            {/* Drive loading (admin only) */}
             {driveLoading && (
               <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: 12, animation: 'pulse 1.5s ease infinite' }}>📂</div>
-                <p style={{ fontWeight: 700 }}>Memuat semua foto dari Google Drive Anda...</p>
+                <p style={{ fontWeight: 700 }}>Memuat foto dari Google Drive Anda...</p>
               </div>
             )}
 
@@ -618,25 +674,25 @@ export default function App() {
               {/* Upload Panel */}
               <div className="upload-panel">
 
-                {/* Google Sign-in CTA (when not connected) */}
+                {/* Google Sign-in CTA — Admin Only */}
                 {!googleToken && !googleSigningIn && (
-                  <div style={{ background: 'linear-gradient(135deg, rgba(66,133,244,0.12), rgba(52,168,83,0.12))',
-                    border: '1px solid rgba(66,133,244,0.3)', borderRadius: 16, padding: '20px 18px', marginBottom: 20 }}>
-                    <p style={{ fontWeight: 800, fontSize: '1rem', marginBottom: 6 }}>
-                      ☁️ Muat Semua Foto dari Google Drive
+                  <div style={{ background: 'rgba(100,116,139,0.08)',
+                    border: '1px solid rgba(100,116,139,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
+                    <p style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-muted)' }}>
+                      🔧 Khusus Admin
                     </p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.83rem', lineHeight: 1.6, marginBottom: 14 }}>
-                      Login Google Drive sekali, semua foto Lebaran 2026 di folder Anda langsung muncul otomatis — tanpa unduh, tanpa upload manual!
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.6, marginBottom: 10 }}>
+                      Muat foto baru dari Drive (opsional, hanya untuk admin)
                     </p>
                     {!clientId ? (
-                      <button onClick={() => setShowClientIdSetup(true)} className="btn btn-primary"
-                        style={{ width: '100%', background: 'linear-gradient(135deg, #4285F4, #34A853)', fontSize: '0.88rem' }}>
-                        ⚙️ Setup Sekali → Login Google Drive
+                      <button onClick={() => setShowClientIdSetup(true)} className="btn btn-outline"
+                        style={{ width: '100%', fontSize: '0.82rem', padding: '8px 12px' }}>
+                        ⚙️ Setup Admin Drive
                       </button>
                     ) : (
-                      <button onClick={handleGoogleSignIn} className="btn btn-primary"
-                        style={{ width: '100%', background: 'linear-gradient(135deg, #4285F4, #34A853)', fontSize: '0.88rem' }}>
-                        <LogIn size={16}/> Masuk dengan Google Drive
+                      <button onClick={handleGoogleSignIn} className="btn btn-outline"
+                        style={{ width: '100%', fontSize: '0.82rem', padding: '8px 12px' }}>
+                        <LogIn size={14}/> Login Admin Drive
                       </button>
                     )}
                   </div>
@@ -713,7 +769,8 @@ export default function App() {
                     {filteredPhotos.map(photo => (
                       <div key={photo.id} className="document-item-card animate-fade-in">
                         <div className="doc-preview-area" onClick={() => setLightboxPhoto(photo)} style={{ cursor: 'zoom-in' }}>
-                          {photo.source === 'drive' ? (
+                        {/* Photo image rendering based on source */}
+                          {photo.source === 'drive' && googleToken ? (
                             <AuthImage
                               fileId={photo.id}
                               accessToken={googleToken}
@@ -722,7 +779,7 @@ export default function App() {
                             />
                           ) : (
                             <img
-                              src={photo.dataUrl}
+                              src={photo.thumbSrc || photo.src || photo.dataUrl}
                               alt={photo.name}
                               className="doc-preview-img"
                               loading="lazy"
