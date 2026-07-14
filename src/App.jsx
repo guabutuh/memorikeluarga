@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Upload, Trash2, FolderOpen, Camera, LogOut,
   Heart, KeyRound, RefreshCw, X, ExternalLink,
-  Download, ZoomIn, LogIn, CheckCircle, ImageOff
+  Download, ZoomIn, ImageOff
 } from 'lucide-react';
 import { encryptData, decryptData } from './encryption';
 
@@ -612,26 +612,11 @@ export default function App() {
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
                   {publicLoading ? 'Memuat foto...' : allPhotos.length > 0
                     ? `${allPhotos.length} foto tersedia`
-                    : 'Foto sedang dimuat...'}
+                    : 'Foto akan segera muncul...'}
                   {localFiles.length > 0 ? ` • ${localFiles.length} foto lokal` : ''}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                {!googleToken ? (
-                  <button onClick={handleGoogleSignIn} disabled={googleSigningIn}
-                    className="btn btn-primary"
-                    style={{ background: 'linear-gradient(135deg, #4285F4, #34A853)', fontSize: '0.9rem', padding: '10px 20px', gap: 8 }}>
-                    {googleSigningIn
-                      ? <><RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }}/> Menghubungkan...</>
-                      : <><LogIn size={16}/> Masuk dengan Google Drive</>}
-                  </button>
-                ) : (
-                  <button onClick={() => fetchDrivePhotos(googleToken)} disabled={driveLoading}
-                    className="btn btn-outline" style={{ fontSize: '0.82rem', padding: '8px 14px' }}>
-                    <RefreshCw size={14} style={{ animation: driveLoading ? 'spin 1s linear infinite' : 'none' }}/>
-                    {driveLoading ? 'Memuat...' : 'Refresh Drive'}
-                  </button>
-                )}
                 <div className="vault-status-badge" style={{ color: '#ec4899', borderColor: 'rgba(236,72,153,0.2)', backgroundColor: 'rgba(236,72,153,0.1)' }}>
                   <span className="status-dot" style={{ backgroundColor: '#ec4899', boxShadow: '0 0 8px #ec4899' }}></span>
                   <span>Galeri Aktif</span>
@@ -674,41 +659,6 @@ export default function App() {
               {/* Upload Panel */}
               <div className="upload-panel">
 
-                {/* Google Sign-in CTA — Admin Only */}
-                {!googleToken && !googleSigningIn && (
-                  <div style={{ background: 'rgba(100,116,139,0.08)',
-                    border: '1px solid rgba(100,116,139,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                    <p style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-muted)' }}>
-                      🔧 Khusus Admin
-                    </p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.6, marginBottom: 10 }}>
-                      Muat foto baru dari Drive (opsional, hanya untuk admin)
-                    </p>
-                    {!clientId ? (
-                      <button onClick={() => setShowClientIdSetup(true)} className="btn btn-outline"
-                        style={{ width: '100%', fontSize: '0.82rem', padding: '8px 12px' }}>
-                        ⚙️ Setup Admin Drive
-                      </button>
-                    ) : (
-                      <button onClick={handleGoogleSignIn} className="btn btn-outline"
-                        style={{ width: '100%', fontSize: '0.82rem', padding: '8px 12px' }}>
-                        <LogIn size={14}/> Login Admin Drive
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {googleToken && googleUser && (
-                  <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)',
-                    borderRadius: 14, padding: '14px 16px', marginBottom: 20,
-                    display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <CheckCircle size={20} color="#22c55e"/>
-                    <div>
-                      <p style={{ fontWeight: 800, color: '#22c55e', fontSize: '0.9rem' }}>Google Drive Terhubung!</p>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{googleUser.email}</p>
-                    </div>
-                  </div>
-                )}
 
                 <h3 style={{ fontWeight: 800, color: '#ec4899', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Upload size={20}/> Upload Foto Lokal
@@ -759,9 +709,7 @@ export default function App() {
                     </div>
                     <h3 style={{ fontWeight: 800 }}>Belum Ada Foto</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: 340 }}>
-                      {!googleToken
-                        ? 'Klik tombol "Masuk dengan Google Drive" untuk memuat semua foto Lebaran 2026 secara otomatis!'
-                        : 'Tidak ada foto di kategori ini.'}
+                      {publicLoading ? 'Sedang memuat...' : 'Foto keluarga akan muncul di sini setelah diupload.'}
                     </p>
                   </div>
                 ) : (
