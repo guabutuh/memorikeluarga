@@ -1,18 +1,42 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Galeri Foto Keluarga</title>
-    <!-- Google Fonts for premium typography -->
+    <title>OmaOpa - Album Foto Keluarga</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Quicksand (ramah & lucu) & Plus Jakarta Sans (bersih & mudah dibaca) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#F3F8FC', // Biru es sangat lembut
+                            dark: '#0B0F19',  // Gelap malam tenang
+                            dinoBlue: '#60A5FA', // Biru dino ceria
+                            dinoLight: '#DBEAFE', // Biru pastel muda
+                            dinoMuted: '#1E293B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <!-- Google Identity Services for Drive OAuth2 -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
-  <body>
+  <body class="bg-brand-light text-slate-700 transition-colors duration-300 dark:bg-brand-dark dark:text-slate-200 min-h-screen flex flex-col selection:bg-blue-100 selection:text-blue-900">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -1,192 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-
-/* ══════════════════════════════════════════════
-   MOBILE BULLETPROOF — mencegah zoom & geser
-══════════════════════════════════════════════ */
-html {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
-html.dark {
-  background: #2a1625;
-}
+/* Custom Styles for OmaOpa DinoAlbum */
 
 body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-  position: relative;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+    padding: 0;
 }
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  max-width: 100%;
+.font-cute {
+    font-family: 'Quicksand', sans-serif;
 }
-
-img, video, iframe, embed, object {
-  max-width: 100%;
-  height: auto;
+/* Animasi mengambang lembut untuk Dino */
+@keyframes gentle-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
 }
-
-input, textarea, select {
-  font-size: 16px !important;
+.elegant-float {
+    animation: gentle-float 5s ease-in-out infinite;
 }
-
-:root {
-  /* LIGHT MODE - Bubbly Cute Pastel */
-  --bg-main: #fff5f8;
-  --bg-card: #ffffff;
-  
-  --text-main: #5c3c4f;
-  --text-muted: #9c7b8d;
-  
-  --border-light: #ffe0e9;
-  --border-dark: #ffc4d4;
-  
-  /* Primary accent */
-  --primary: #ff7597; 
-  --primary-hover: #ff5780;
-  --primary-light: #ffebf0;
-
-  --nav-blur: rgba(255, 245, 248, 0.9);
-  
-  /* Bubbly radius */
-  --radius-sm: 16px;
-  --radius-md: 24px;
-  --radius-lg: 32px;
-  
-  --shadow-sm: 0 4px 12px rgba(255, 117, 151, 0.08);
-  --shadow-md: 0 8px 24px rgba(255, 117, 151, 0.12);
-  --shadow-lg: 0 16px 32px rgba(255, 117, 151, 0.16);
+/* Efek transisi bouncy lembut untuk tombol */
+.btn-bouncy {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
-html.dark {
-  /* DARK MODE - Warm Purple Cute */
-  --bg-main: #2a1625;
-  --bg-card: #3a2233;
-  
-  --text-main: #ffe6f0;
-  --text-muted: #d4a3be;
-  
-  --border-light: #4d2d44;
-  --border-dark: #663e5b;
-  
-  --primary: #ff8da8;
-  --primary-hover: #ffa8bf;
-  --primary-light: #522941;
-
-  --nav-blur: rgba(42, 22, 37, 0.9);
-
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.4);
+.btn-bouncy:active {
+    transform: scale(0.95);
 }
-
-html, body {
-  margin: 0; padding: 0;
-  background: var(--bg-main);
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  color: var(--text-main);
-  -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* Bayangan premium yang lembut */
+.dino-shadow {
+    box-shadow: 0 12px 30px -10px rgba(96, 165, 250, 0.15);
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-*:not(img) {
-  transition: background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+.dark .dino-shadow {
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
 }
-img {
-  display: block;
-  image-rendering: auto;
+/* Scrollbar kustom estetik */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
-
-/* ═══ APP LAYOUT ═══ */
-.app-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+::-webkit-scrollbar-track {
+    background: transparent;
 }
-
-/* ═══ HEADER ═══ */
-.header {
-  background: var(--nav-blur);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 2px dashed var(--border-light);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
 }
-@media(min-width:640px){ .header { padding: 16px 32px; } }
-
-.logo-section { display: flex; align-items: center; gap: 12px; }
-
-.shield-icon-wrapper {
-  width: 44px; height: 44px;
-  background: var(--primary);
-  border-radius: var(--radius-sm);
-  display: flex; align-items: center; justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 117, 151, 0.3);
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
 }
-
-.app-title-container h1 {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.theme-toggle {
-  background: var(--primary-light);
-  border: none;
-  color: var(--primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-}
-.theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
-
-/* ═══ BUTTONS ═══ */
-.btn {
-  font-family: inherit;
-  font-weight: 800;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px 24px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 0.95rem;
-}
-.btn:active { transform: scale(0.93); }
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  box-shadow: 0 4px 16px rgba(255, 117, 151, 0.4);
-}
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-
-.btn-outline {
-  background: transparent;
-  border: 2px solid var(--border-dark);
-  color: var(--text-main);
-}
-.btn-outline:hover { background: var(--border-light); }
 
 /* ═══ LOCK SCREEN ═══ */
 .lock-container {
