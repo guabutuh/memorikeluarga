@@ -100,7 +100,7 @@ export default function App() {
   const [googleToken, setGoogleToken] = useState(null);
   const [googleUser, setGoogleUser] = useState(null);
   const [googleSigningIn, setGoogleSigningIn] = useState(false);
-  const tokenClientRef = useRef(null);
+  // Note: tokenClientRef removed - now using redirect flow (mobile-friendly)
 
   // --- Drive Photos ---
   const [drivePhotos, setDrivePhotos] = useState([]);
@@ -139,7 +139,7 @@ export default function App() {
     };
   }, [resetIdleTimer]);
 
-  // --- Load saved state ---
+  // --- Load saved state + handle OAuth redirect token from URL hash ---
   useEffect(() => {
     const savedMaster = localStorage.getItem('family_vault_master_pin_check');
     const savedFiles = localStorage.getItem('family_vault_encrypted_files');
@@ -147,37 +147,25 @@ export default function App() {
     if (savedMaster) { setHasSetup(true); setMasterPassword(savedMaster); }
     if (savedClientId) { setClientId(savedClientId); setClientIdInput(savedClientId); }
     if (savedFiles) { try { setEncryptedFiles(JSON.parse(savedFiles)); } catch (e) {} }
-  }, []);
 
-  // --- Init Google Token Client ---
-  useEffect(() => {
-    if (!clientId || !window.google) return;
-    try {
-      tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: SCOPES,
-        callback: async (tokenResponse) => {
-          if (tokenResponse.error) {
-            setDriveError('Login Google gagal: ' + tokenResponse.error);
-            setGoogleSigningIn(false);
-            return;
-          }
-          setGoogleToken(tokenResponse.access_token);
-          setGoogleSigningIn(false);
-          // Fetch user info
-          try {
-            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-              headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-            });
-            const user = await res.json();
-            setGoogleUser(user);
-          } catch (e) {}
-        },
-      });
-    } catch (err) {
-      console.error('GIS init error:', err);
+    // Handle OAuth2 implicit redirect: token comes back in URL hash
+    // e.g. https://memorikeluarga.vercel.app/#access_token=xxx&token_type=Bearer&expires_in=3599
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      const params = new URLSearchParams(hash.replace(/^#/, ''));
+      const token = params.get('access_token');
+      if (token) {
+        setGoogleToken(token);
+        setGoogleSigningIn(false);
+        // Fetch user info
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(r => r.json()).then(user => setGoogleUser(user)).catch(() => {});
+        // Clean up URL so token is not visible / bookmarkable
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     }
-  }, [clientId]);
+  }, []);
 
   // --- Auto fetch when token available & unlocked ---
   useEffect(() => {
@@ -186,16 +174,20 @@ export default function App() {
     }
   }, [isUnlocked, googleToken]);
 
-  // --- Sign in with Google ---
+  // --- Sign in with Google (redirect flow — works on all mobile browsers) ---
   const handleGoogleSignIn = () => {
     if (!clientId) { setShowClientIdSetup(true); return; }
-    if (!tokenClientRef.current) {
-      setDriveError('Google Sign-In belum siap. Pastikan Client ID sudah diisi dan refresh halaman.');
-      return;
-    }
     setGoogleSigningIn(true);
     setDriveError('');
-    tokenClientRef.current.requestAccessToken({ prompt: 'consent' });
+    // Build Google OAuth2 implicit flow URL
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: window.location.origin + window.location.pathname,
+      response_type: 'token',
+      scope: SCOPES,
+      include_granted_scopes: 'true',
+    });
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   // --- Sign out Google ---
@@ -215,29 +207,7 @@ export default function App() {
     localStorage.setItem('family_vault_client_id', id);
     setClientId(id);
     setShowClientIdSetup(false);
-    // Re-init token client
-    setTimeout(() => {
-      if (!window.google) return;
-      tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-        client_id: id,
-        scope: SCOPES,
-        callback: async (tokenResponse) => {
-          if (tokenResponse.error) {
-            setDriveError('Login Google gagal: ' + tokenResponse.error);
-            setGoogleSigningIn(false);
-            return;
-          }
-          setGoogleToken(tokenResponse.access_token);
-          setGoogleSigningIn(false);
-          try {
-            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-              headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-            });
-            setGoogleUser(await res.json());
-          } catch (e) {}
-        },
-      });
-    }, 500);
+    // No need to re-init token client — redirect flow handles it
   };
 
   // --- Recursively fetch files from a folder and all its subfolders ---
