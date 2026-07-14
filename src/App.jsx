@@ -204,19 +204,19 @@ export default function App() {
   const handleDownload = async (photo) => {
     try {
       const url = photo.dataUrl || photo.src || `https://drive.google.com/thumbnail?id=${photo.id}&sz=w2000`;
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
       
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = `${photo.name || 'foto_keluarga'}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
+      if (url.startsWith('data:')) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${photo.name || 'foto_keluarga'}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        window.open(url, '_blank');
+      }
     } catch (err) {
-      alert("❌ Gagal mengunduh foto.");
+      alert("❌ Gagal membuka foto.");
     }
   };
 
@@ -385,7 +385,7 @@ export default function App() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {filteredPhotos.map(photo => {
+                {filteredPhotos.map((photo, index) => {
                   let catEmoji = "📸";
                   let catName = photo.category;
                   if (photo.category === 'liburan') { catEmoji = "🏖️"; catName = d.catHoliday; }
@@ -394,7 +394,7 @@ export default function App() {
                   else if (photo.category === 'harian') { catEmoji = "🏡"; catName = d.catDaily; }
 
                   return (
-                    <div key={photo.id} onClick={() => setLightboxPhoto(photo)} className="bg-white dark:bg-slate-900 border border-blue-100/50 dark:border-slate-800 rounded-3xl overflow-hidden dino-shadow hover:border-blue-300 dark:hover:border-slate-700 transform hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer p-3">
+                    <div key={photo.id} onClick={() => setLightboxPhoto(photo)} className="animate-pop bg-white dark:bg-slate-900 border border-blue-100/50 dark:border-slate-800 rounded-3xl overflow-hidden dino-shadow hover:border-blue-300 dark:hover:border-slate-700 transform hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer p-3" style={{ animationDelay: `${(index % 15) * 0.05}s` }}>
                       <div className="h-44 w-full bg-slate-50 dark:bg-slate-950 overflow-hidden relative border border-slate-100 dark:border-slate-800 rounded-2xl">
                         <img src={photo.thumbSrc || photo.src || photo.dataUrl} className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" alt={photo.name} loading="lazy" />
                         <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs text-[10px] font-bold rounded-xl text-slate-700 dark:text-slate-300 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-1 font-cute">
