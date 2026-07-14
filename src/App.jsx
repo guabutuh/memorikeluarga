@@ -113,14 +113,17 @@ export default function App() {
 
   // Fetch Public Photos from JSON
   useEffect(() => {
-    fetch('/photos.json')
+    fetch('/photos.json?t=' + new Date().getTime())
       .then(res => res.json())
       .then(data => {
-        const drivePhotos = data.map(p => ({
+        const photosArray = data.photos || [];
+        const drivePhotos = photosArray.map(p => ({
           ...p,
           source: 'drive',
           date: p.albumName === 'LEBARAN' ? '2026-04-10' : '2026-01-01',
-          category: p.albumName === 'LEBARAN' ? 'hariraya' : 'liburan'
+          category: p.albumName === 'LEBARAN' ? 'hariraya' : 'liburan',
+          thumbSrc: `https://drive.google.com/thumbnail?id=${p.id}&sz=w400`,
+          src: `https://drive.google.com/thumbnail?id=${p.id}&sz=w2000`
         }));
         
         localforage.getItem('omaopa_dino_photos').then(localData => {
