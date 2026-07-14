@@ -8,6 +8,7 @@ import { encryptData, decryptData } from './encryption';
 
 const FOLDER_ID = '1rvEOVGK93P2eYwnOO2FFB-_fpndCTqVo';
 const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+const MASTER_PASSWORD = 'Multatuli19'; // Password tetap untuk semua anggota keluarga
 
 // Component that fetches private Drive images as blobs using access token
 function AuthImage({ fileId, accessToken, alt, className, style, onClick }) {
@@ -84,10 +85,7 @@ function AuthImage({ fileId, accessToken, alt, className, style, onClick }) {
 
 export default function App() {
   // --- Vault Auth ---
-  const [hasSetup, setHasSetup] = useState(false);
-  const [masterPassword, setMasterPassword] = useState('');
   const [inputPassword, setInputPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -146,15 +144,12 @@ export default function App() {
 
   // --- Load saved state + handle OAuth redirect token from URL hash ---
   useEffect(() => {
-    const savedMaster = localStorage.getItem('family_vault_master_pin_check');
     const savedFiles = localStorage.getItem('family_vault_encrypted_files');
     const savedClientId = localStorage.getItem('family_vault_client_id');
-    if (savedMaster) { setHasSetup(true); setMasterPassword(savedMaster); }
     if (savedClientId) { setClientId(savedClientId); setClientIdInput(savedClientId); }
     if (savedFiles) { try { setEncryptedFiles(JSON.parse(savedFiles)); } catch (e) {} }
 
     // Handle OAuth2 implicit redirect: token comes back in URL hash
-    // e.g. https://memorikeluarga.vercel.app/#access_token=xxx&token_type=Bearer&expires_in=3599
     const hash = window.location.hash;
     if (hash && hash.includes('access_token=')) {
       const params = new URLSearchParams(hash.replace(/^#/, ''));
@@ -162,11 +157,9 @@ export default function App() {
       if (token) {
         setGoogleToken(token);
         setGoogleSigningIn(false);
-        // Fetch user info
         fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${token}` }
         }).then(r => r.json()).then(user => setGoogleUser(user)).catch(() => {});
-        // Clean up URL so token is not visible / bookmarkable
         window.history.replaceState(null, '', window.location.pathname);
       }
     }
@@ -237,7 +230,7 @@ export default function App() {
         category: f.albumName || 'LEBARAN',
         // Public thumbnail (works because folder is shared publicly)
         src: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1200`,
-        thumbSrc: `https://drive.google.com/thumbnail?id=${f.id}&sz=w800`,
+        thumbSrc: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1200`,
         driveLink: `https://drive.google.com/file/d/${f.id}/view`,
       }));
       setPublicPhotos(photos);
@@ -333,30 +326,18 @@ export default function App() {
     }
   };
 
-  // --- Vault Setup ---
-  const handleSetupPassword = async (e) => {
-    e.preventDefault();
-    const cleanPw = inputPassword.trim();
-    if (cleanPw.length < 4) { setPasswordError('Minimal 4 karakter!'); return; }
-    if (cleanPw !== passwordConfirm.trim()) { setPasswordError('Konfirmasi tidak cocok!'); return; }
-    localStorage.setItem('family_vault_master_pin_check', cleanPw);
-    setMasterPassword(cleanPw);
-    setHasSetup(true);
-    setInputPassword(''); setPasswordConfirm(''); setPasswordError('');
-  };
-
-  // --- Unlock ---
+  // --- Unlock (password hardcoded) ---
   const handleUnlock = async (e) => {
     if (e) e.preventDefault();
     const pw = inputPassword.trim();
     if (!pw) { setPasswordError('Masukkan kata sandi.'); return; }
-    if (pw !== masterPassword) { setPasswordError('Kata sandi salah!'); return; }
+    if (pw !== MASTER_PASSWORD) { setPasswordError('Kata sandi salah!'); return; }
     setUnlocking(true);
     try {
       const decrypted = [];
       for (const encFile of encryptedFiles) {
-        const fd = JSON.parse(await decryptData(encFile.payload, pw));
-        const fm = JSON.parse(await decryptData(encFile.metadata, pw));
+        const fd = JSON.parse(await decryptData(encFile.payload, MASTER_PASSWORD));
+        const fm = JSON.parse(await decryptData(encFile.metadata, MASTER_PASSWORD));
         decrypted.push({ id: encFile.id, ...fm, dataUrl: fd.dataUrl });
       }
       setLocalFiles(decrypted);
@@ -399,7 +380,7 @@ export default function App() {
           category: uploadCategory, size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
           dateAdded: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
         });
-        updEnc.push({ id, payload: await encryptData(fp, masterPassword), metadata: await encryptData(mp, masterPassword) });
+        updEnc.push({ id, payload: await encryptData(fp, MASTER_PASSWORD), metadata: await encryptData(mp, MASTER_PASSWORD) });
         newDec.push({ id, category: uploadCategory, name: file.name.split('.')[0], fileName: file.name,
           fileType: file.type, dateAdded: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
           dataUrl, size: (file.size / 1024 / 1024).toFixed(2) + ' MB' });
@@ -536,70 +517,29 @@ export default function App() {
         {/* Lock Screen */}
         {!isUnlocked && (
           <div className="lock-container">
-            {!hasSetup ? (
-              <form onSubmit={handleSetupPassword} style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
-                <div className="lock-header">
-                  <div className="lock-icon-wrapper" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
-                    <KeyRound size={32}/>
-                  </div>
-                  <h2 className="lock-title">Buat Sandi Keluarga</h2>
-                  <p className="lock-desc">Buat kata sandi rahasia yang mudah diingat seluruh keluarga.</p>
+            <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
+              <div className="lock-header">
+                <div className="lock-icon-wrapper" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
+                  <KeyRound size={32}/>
                 </div>
-                <div className="setup-pin-fields" style={{ width: '100%' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ textAlign: 'left' }}>Kata Sandi Baru:</label>
-                    <input type={showPassword ? 'text' : 'password'} value={inputPassword}
-                      onChange={e => setInputPassword(e.target.value)} className="text-input"
-                      placeholder="Masukkan kata sandi baru..." style={{ fontSize: '1.1rem' }}/>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" style={{ textAlign: 'left' }}>Konfirmasi:</label>
-                    <input type={showPassword ? 'text' : 'password'} value={passwordConfirm}
-                      onChange={e => setPasswordConfirm(e.target.value)} className="text-input"
-                      placeholder="Ulangi kata sandi..." style={{ fontSize: '1.1rem' }}/>
-                  </div>
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="reset-vault-link">
-                    {showPassword ? 'Sembunyikan' : 'Tampilkan'}
-                  </button>
-                </div>
-                {passwordError && <p style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{passwordError}</p>}
-                <button type="submit" className="btn btn-primary"
-                  style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
-                  Simpan & Aktifkan Galeri
+                <h2 className="lock-title">Pintu Masuk Keluarga</h2>
+                <p className="lock-desc">Masukkan kata sandi untuk melihat galeri foto keluarga.</p>
+              </div>
+              <div className="form-group" style={{ width: '100%' }}>
+                <input type={showPassword ? 'text' : 'password'} value={inputPassword}
+                  onChange={e => setInputPassword(e.target.value)} className="text-input"
+                  placeholder="Masukkan kata sandi..." style={{ textAlign: 'center', fontSize: '1.1rem' }}
+                  disabled={unlocking} autoFocus/>
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="reset-vault-link" style={{ marginTop: 8 }}>
+                  {showPassword ? 'Sembunyikan' : 'Tampilkan'}
                 </button>
-              </form>
-            ) : (
-              <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
-                <div className="lock-header">
-                  <div className="lock-icon-wrapper" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
-                    <KeyRound size={32}/>
-                  </div>
-                  <h2 className="lock-title">Pintu Masuk Keluarga</h2>
-                  <p className="lock-desc">Masukkan kata sandi rahasia keluarga besar.</p>
-                </div>
-                <div className="form-group" style={{ width: '100%' }}>
-                  <input type={showPassword ? 'text' : 'password'} value={inputPassword}
-                    onChange={e => setInputPassword(e.target.value)} className="text-input"
-                    placeholder="Ketik kata sandi keluarga..." style={{ textAlign: 'center', fontSize: '1.1rem' }}
-                    disabled={unlocking}/>
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="reset-vault-link" style={{ marginTop: 8 }}>
-                    {showPassword ? 'Sembunyikan' : 'Tampilkan'}
-                  </button>
-                </div>
-                {passwordError && <p style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{passwordError}</p>}
-                <button type="submit" className="btn btn-primary" disabled={unlocking}
-                  style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
-                  {unlocking ? 'Membuka...' : 'Buka Pintu Masuk 🔑'}
-                </button>
-                <div className="lock-footer-info">
-                  <span>🛡️ Enkripsi AES-256</span>
-                  <button type="button" className="reset-vault-link"
-                    onClick={() => { if (window.confirm('Hapus semua data?')) { localStorage.clear(); window.location.reload(); } }}>
-                    Setel Ulang
-                  </button>
-                </div>
-              </form>
-            )}
+              </div>
+              {passwordError && <p style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{passwordError}</p>}
+              <button type="submit" className="btn btn-primary" disabled={unlocking}
+                style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
+                {unlocking ? 'Membuka...' : 'Masuk ke Galeri 🔑'}
+              </button>
+            </form>
           </div>
         )}
 
