@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Upload, Trash2, FolderOpen, Camera, LogOut,
   Heart, KeyRound, RefreshCw, X, ExternalLink,
-  Download, ZoomIn, ImageOff
+  Download, ZoomIn, ImageOff, Sun, Moon, Shield, Image, Plus
 } from 'lucide-react';
 import { encryptData, decryptData } from './encryption';
 
@@ -90,6 +90,17 @@ export default function App() {
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+
+  // --- Theme ---
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   // --- Google OAuth ---
   const [clientId, setClientId] = useState('');
@@ -439,16 +450,22 @@ export default function App() {
       {/* HEADER */}
       <header className="header">
         <div className="logo-section">
-          <div className="shield-icon-wrapper"><Heart size={22}/></div>
+          <div className="shield-icon-wrapper"><Shield size={20}/></div>
           <div className="app-title-container">
-            <h1>Galeri Keluarga <span className="e2e-badge">Privat</span></h1>
-            <p className="subtitle">Kenangan indah keluarga besar kita 💕</p>
+            <h1>Galeri Keluarga</h1>
           </div>
         </div>
-        <div className="header-controls">
+        <div className="header-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            className="theme-toggle" 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Ubah Tema"
+          >
+            {theme === 'dark' ? <Sun size={20}/> : <Moon size={20}/>}
+          </button>
           {isUnlocked && (
-            <button onClick={handleLock} className="btn btn-outline" style={{ fontSize:'0.82rem', padding:'8px 14px' }}>
-              <LogOut size={15}/> Kunci
+            <button onClick={handleLock} className="btn btn-outline" style={{ fontSize:'0.85rem', padding:'8px 12px', border:'none' }}>
+              <LogOut size={16}/> Keluar
             </button>
           )}
         </div>
@@ -461,11 +478,9 @@ export default function App() {
           <div className="lock-container">
             <form onSubmit={handleUnlock} style={{ display:'flex', flexDirection:'column', gap:18, width:'100%' }}>
               <div className="lock-header">
-                <div className="lock-icon-wrapper">
-                  <span style={{ fontSize:'2rem' }}>📸</span>
-                </div>
-                <h2 className="lock-title">Galeri Foto Keluarga</h2>
-                <p className="lock-desc">Masukkan kata sandi untuk melihat foto-foto keluarga 🏠</p>
+                <Shield size={48} style={{ color: 'var(--primary)', marginBottom: 16 }} />
+                <h2 className="lock-title">Galeri Pribadi</h2>
+                <p className="lock-desc">Masukkan sandi keamanan untuk mengakses foto keluarga.</p>
               </div>
               <div className="form-group">
                 <input
@@ -473,22 +488,22 @@ export default function App() {
                   value={inputPassword}
                   onChange={e => setInputPassword(e.target.value)}
                   className="text-input"
-                  placeholder="Ketik kata sandi di sini..."
-                  style={{ textAlign:'center', fontSize:'1.15rem' }}
+                  placeholder="Kata sandi"
+                  style={{ textAlign:'center' }}
                   disabled={unlocking} autoFocus
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="reset-vault-link" style={{ textAlign:'center' }}>
-                  {showPassword ? '🙈 Sembunyikan' : '👁️ Tampilkan kata sandi'}
+                  {showPassword ? 'Sembunyikan Sandi' : 'Tampilkan Sandi'}
                 </button>
               </div>
               {passwordError && (
-                <p style={{ color:'#ef4444', fontWeight:700, textAlign:'center', background:'#fee2e2', padding:10, borderRadius:10 }}>
-                  ❌ {passwordError}
+                <p style={{ color:'#ef4444', fontWeight:600, textAlign:'center', fontSize: '0.85rem' }}>
+                  Sandi salah. Coba lagi.
                 </p>
               )}
               <button type="submit" className="btn btn-primary" disabled={unlocking}
-                style={{ width:'100%', padding:16, fontSize:'1rem', borderRadius:14 }}>
-                {unlocking ? '⏳ Membuka...' : '🔓 Masuk Lihat Foto'}
+                style={{ width:'100%', padding:14, fontSize:'1rem' }}>
+                {unlocking ? 'Memeriksa...' : 'Buka Galeri'}
               </button>
             </form>
           </div>
@@ -509,26 +524,23 @@ export default function App() {
               <>
                 <div className="vault-header-bar">
                   <div>
-                    <p style={{ fontWeight:800, fontSize:'1.05rem' }}>
-                      📸 {allPhotos.length > 0 ? `${allPhotos.length} Foto Tersimpan` : 'Album Foto Keluarga'}
+                    <p style={{ fontWeight:700, fontSize:'1.1rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Image size={18}/> {allPhotos.length} Foto Tersimpan
                     </p>
-                    {allPhotos.length > 0 && (
-                      <p style={{ fontSize:'0.75rem', color:'var(--text-muted)', marginTop:2 }}>Ketuk foto untuk melihat lebih besar</p>
-                    )}
                   </div>
                   <div className="vault-status-badge">
-                    <span className="status-dot"></span> Aktif
+                    <span className="status-dot"></span> Sinkronasi Aktif
                   </div>
                 </div>
 
                 {/* Filter tabs */}
                 <div className="filters-bar">
                   {[
-                    { key:'SEMUA', label:'📷 Semua' },
-                    { key:'LEBARAN', label:'🌙 Lebaran' },
-                    { key:'LIBURAN', label:'✈️ Liburan' },
-                    { key:'PERNIKAHAN', label:'💍 Pernikahan' },
-                    { key:'LAIN', label:'📁 Lainnya' },
+                    { key:'SEMUA', label:'Semua' },
+                    { key:'LEBARAN', label:'Lebaran' },
+                    { key:'LIBURAN', label:'Liburan' },
+                    { key:'PERNIKAHAN', label:'Pernikahan' },
+                    { key:'LAIN', label:'Lainnya' },
                   ].map(({ key, label }) => (
                     <button key={key} onClick={() => setSelectedCategory(key)}
                       className={`filter-tab ${selectedCategory === key ? 'active' : ''}`}>
@@ -540,9 +552,9 @@ export default function App() {
                 {/* Photo grid */}
                 {filteredPhotos.length === 0 ? (
                   <div className="empty-state">
-                    <div className="emoji">🖼️</div>
-                    <h3>Belum ada foto</h3>
-                    <p>Foto keluarga akan muncul di sini. Tekan tombol <strong>+</strong> di bawah kanan untuk tambah foto.</p>
+                    <ImageOff size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
+                    <h3>Album Kosong</h3>
+                    <p>Tidak ada foto dalam kategori ini.</p>
                   </div>
                 ) : (
                   <div className="photo-grid">
@@ -568,8 +580,8 @@ export default function App() {
 
         {/* FLOATING UPLOAD BUTTON */}
         {isUnlocked && (
-          <button className="fab-upload" onClick={() => setShowUploadSheet(true)} title="Tambah Foto">
-            +
+          <button className="fab-upload" onClick={() => setShowUploadSheet(true)} title="Unggah Foto">
+            <Plus size={28}/>
           </button>
         )}
 
@@ -578,11 +590,11 @@ export default function App() {
           <div className="upload-sheet-overlay" onClick={() => setShowUploadSheet(false)}>
             <div className="upload-sheet" onClick={e => e.stopPropagation()}>
               <div className="sheet-handle"/>
-              <h3 style={{ fontWeight:800, fontSize:'1.1rem' }}>📤 Tambah Foto</h3>
+              <h3 style={{ fontWeight:700, fontSize:'1.1rem' }}>Unggah Foto</h3>
               <div className="form-group">
-                <label className="form-label">Pilih Album:</label>
+                <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Pilih Album:</label>
                 <div className="category-select-grid">
-                  {[['LEBARAN','🌙 Lebaran'],['LIBURAN','✈️ Liburan'],['PERNIKAHAN','💍 Pernikahan'],['LAIN','📁 Lainnya']].map(([cat,label]) => (
+                  {[['LEBARAN','Lebaran'],['LIBURAN','Liburan'],['PERNIKAHAN','Pernikahan'],['LAIN','Lainnya']].map(([cat,label]) => (
                     <button key={cat} type="button"
                       onClick={() => setUploadCategory(cat)}
                       className={`btn-select-category ${uploadCategory === cat ? 'active' : ''}`}>
@@ -595,12 +607,12 @@ export default function App() {
                 <input type="file" accept="image/*" multiple
                   onChange={async e => { await handleFileUpload(e); setShowUploadSheet(false); }}
                   className="dropzone-file-input" disabled={uploading}/>
-                <div className="dropzone-icon-wrapper"><Camera size={26}/></div>
-                <p style={{ fontWeight:800, color:'var(--pink)' }}>{uploading ? '⏳ Menyimpan...' : '📷 Pilih Foto dari HP'}</p>
-                <p style={{ fontSize:'0.78rem', color:'var(--text-muted)' }}>Bisa pilih banyak foto sekaligus</p>
+                <div className="dropzone-icon-wrapper"><Camera size={24}/></div>
+                <p style={{ fontWeight:600 }}>{uploading ? 'Menyimpan...' : 'Pilih dari Perangkat'}</p>
+                <p style={{ fontSize:'0.8rem', color:'var(--text-muted)' }}>Mendukung banyak foto sekaligus</p>
               </div>
-              {uploadProgress && <p style={{ textAlign:'center', color:'var(--pink)', fontWeight:700 }}>{uploadProgress}</p>}
-              {uploadError && <p style={{ textAlign:'center', color:'#ef4444', fontWeight:700 }}>{uploadError}</p>}
+              {uploadProgress && <p style={{ textAlign:'center', color:'var(--primary)', fontWeight:600 }}>{uploadProgress}</p>}
+              {uploadError && <p style={{ textAlign:'center', color:'#ef4444', fontWeight:600 }}>{uploadError}</p>}
               <button onClick={() => setShowUploadSheet(false)} className="btn btn-outline" style={{ width:'100%' }}>Batal</button>
             </div>
           </div>
@@ -608,7 +620,7 @@ export default function App() {
 
       </main>
 
-      <footer className="footer">❤️ Dibuat dengan kasih sayang untuk keluarga besar kita</footer>
+      <footer className="footer">Dibuat untuk keluarga tercinta</footer>
     </div>
   );
 }

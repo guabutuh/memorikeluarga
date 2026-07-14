@@ -17,7 +17,11 @@ import { join, dirname } from 'path';
 // ============================================================
 // KONFIGURASI - Isi ini sesuai punya kamu
 // ============================================================
-const FOLDER_ID = '1rvEOVGK93P2eYwnOO2FFB-_fpndCTqVo';
+const FOLDER_IDS = [
+  '1rvEOVGK93P2eYwnOO2FFB-_fpndCTqVo', // Folder 1
+  '11azeD18W5HKcNFUgaRyhNVHCSi-P9_x0', // Folder 2
+  '1dhmDKoyjVFeH9ZfVNxZD6zl0PFPDJNqq'  // Folder 3
+];
 const GOOGLE_API_KEY = 'AIzaSyCrjrM4yaN7BCuSl0CrixIbJpIX8sBUgQE'; // Buat di: console.cloud.google.com
 // ============================================================
 
@@ -84,14 +88,25 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('📂 Mengambil daftar foto dari Google Drive...');
-  const photos = await fetchFilesFromFolder(FOLDER_ID, GOOGLE_API_KEY, 'LEBARAN');
-  console.log(`✅ Ditemukan ${photos.length} foto`);
+  console.log(`📂 Mengambil daftar foto dari ${FOLDER_IDS.length} folder Google Drive...`);
+  const allPhotos = [];
+  
+  for (const folderId of FOLDER_IDS) {
+    try {
+      const photos = await fetchFilesFromFolder(folderId, GOOGLE_API_KEY, 'LEBARAN');
+      allPhotos.push(...photos);
+      console.log(`✅ Sukses ambil ${photos.length} foto dari folder: ${folderId}`);
+    } catch (err) {
+      console.error(`❌ Gagal ambil foto dari folder ${folderId}:`, err.message);
+    }
+  }
+
+  console.log(`\n🎉 Total terkumpul ${allPhotos.length} foto`);
 
   const output = {
     updatedAt: new Date().toISOString(),
-    totalPhotos: photos.length,
-    photos,
+    totalPhotos: allPhotos.length,
+    photos: allPhotos,
   };
 
   const __dirname = dirname(fileURLToPath(import.meta.url));
