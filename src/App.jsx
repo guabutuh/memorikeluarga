@@ -272,6 +272,9 @@ export default function App() {
             <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="btn-bouncy w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-amber-400 shadow-xs">
               <i className={theme === 'dark' ? 'fas fa-moon text-blue-400' : 'fas fa-sun text-amber-500'}></i>
             </button>
+            <button onClick={() => setShowTutorial(true)} className="btn-bouncy w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 hover:bg-blue-100 dark:hover:bg-blue-800 flex items-center justify-center text-blue-500 shadow-xs" title="Panduan Web">
+              <i className="fas fa-question-circle"></i>
+            </button>
             {isUnlocked && (
               <button onClick={() => setIsUnlocked(false)} className="btn-bouncy w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 hover:bg-red-100 flex items-center justify-center text-red-500 shadow-xs">
                 <i className="fas fa-sign-out-alt"></i>
