@@ -124,6 +124,13 @@ export default function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Apply Font Size scaling
+  useEffect(() => {
+    if (fontSize === 'text-sm') document.documentElement.style.fontSize = '14px';
+    else if (fontSize === 'text-lg') document.documentElement.style.fontSize = '18px';
+    else document.documentElement.style.fontSize = '16px';
+  }, [fontSize]);
+
   // Fetch Public Photos from JSON
   useEffect(() => {
     fetch('/photos.json?t=' + new Date().getTime())
