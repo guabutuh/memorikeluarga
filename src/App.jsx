@@ -112,6 +112,7 @@ export default function App() {
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(() => localStorage.getItem('omaopa_tutorial_done') !== 'true');
   
   const [toastMsg, setToastMsg] = useState(null);
   const fileInputRef = useRef(null);
@@ -439,6 +440,65 @@ export default function App() {
             <p className="font-bold text-slate-500 dark:text-slate-400 mb-1 font-cute text-sm">🦕 OmaOpa Dino Memory Space 🦕</p>
             <p className="text-xs text-slate-400 dark:text-slate-500">© 2026 Keluarga Besar Oma & Opa. Hak Cipta Dilindungi.</p>
           </footer>
+
+          {/* AI TUTORIAL MODAL */}
+          {isUnlocked && showTutorial && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-fade-in">
+              <div className="bg-white dark:bg-slate-900 border border-blue-100 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 md:p-8 relative shadow-2xl overflow-hidden animate-slide-up-fade">
+                
+                <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl"></div>
+
+                <div className="relative z-10 flex flex-col gap-6">
+                  <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg animate-float-slow">
+                      🤖
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 font-cute">AI Dino Assistant</h3>
+                      <p className="text-[10px] text-blue-500 font-bold tracking-wider uppercase">Panduan Singkat</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="flex gap-4 items-start animate-slide-right stagger-1">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0 text-xs">1</div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1 font-cute">Cari Kenangan Spesifik</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Gunakan kolom pencarian di atas untuk menemukan momen berdasarkan kategori atau cerita.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-4 items-start animate-slide-right stagger-2">
+                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0 text-xs">2</div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1 font-cute">Simpan ke Perangkat</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Klik salah satu foto yang kamu suka, lalu tekan tombol "Simpan ke HP" untuk mendownloadnya.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 items-start animate-slide-right stagger-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0 text-xs">3</div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1 font-cute">Unggah Kenangan Baru</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Klik tombol 🦖 "Unggah Foto Baru" untuk menambahkan memori keluargamu secara lokal.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setShowTutorial(false);
+                      localStorage.setItem('omaopa_tutorial_done', 'true');
+                    }} 
+                    className="mt-2 btn-bouncy w-full py-3.5 bg-slate-800 hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-2xl font-bold font-cute shadow-lg"
+                  >
+                    Siap, Mengerti! 👍
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* LIGHTBOX / DETAIL MODAL */}
           {lightboxPhoto && (
