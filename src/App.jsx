@@ -237,7 +237,7 @@ export default function App() {
         category: f.albumName || 'LEBARAN',
         // Public thumbnail (works because folder is shared publicly)
         src: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1200`,
-        thumbSrc: `https://drive.google.com/thumbnail?id=${f.id}&sz=w400`,
+        thumbSrc: `https://drive.google.com/thumbnail?id=${f.id}&sz=w800`,
         driveLink: `https://drive.google.com/file/d/${f.id}/view`,
       }));
       setPublicPhotos(photos);
@@ -757,12 +757,7 @@ export default function App() {
                             </p>
                           </div>
                           <div className="doc-card-actions">
-                            {photo.source === 'drive' ? (
-                              <a href={photo.driveLink} target="_blank" rel="noopener noreferrer"
-                                className="btn btn-outline" style={{ flex: 1, padding: '8px 12px', fontSize: '0.82rem' }}>
-                                <ExternalLink size={13}/> Buka Drive
-                              </a>
-                            ) : (
+                            {photo.source === 'local' ? (
                               <>
                                 <a href={photo.dataUrl} download={photo.fileName} className="btn btn-outline"
                                   style={{ flex: 1, padding: '8px 12px', fontSize: '0.82rem' }}>
@@ -773,6 +768,11 @@ export default function App() {
                                   <Trash2 size={16}/>
                                 </button>
                               </>
+                            ) : (
+                              <a href={photo.driveLink} target="_blank" rel="noopener noreferrer"
+                                className="btn btn-outline" style={{ flex: 1, padding: '8px 12px', fontSize: '0.82rem' }}>
+                                <ExternalLink size={13}/> Buka Drive
+                              </a>
                             )}
                           </div>
                         </div>
