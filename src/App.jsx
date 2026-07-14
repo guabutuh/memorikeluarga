@@ -122,6 +122,9 @@ export default function App() {
   // --- Lightbox ---
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
 
+  // --- Upload sheet ---
+  const [showUploadSheet, setShowUploadSheet] = useState(false);
+
   const idleTimeoutRef = useRef(null);
 
   // --- Auto Lock ---
@@ -414,7 +417,6 @@ export default function App() {
     selectedCategory === 'SEMUA' || p.category === selectedCategory
   );
 
-  const [showUploadSheet, setShowUploadSheet] = React.useState(false);
 
   return (
     <div className="app-container">
