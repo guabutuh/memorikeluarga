@@ -84,6 +84,25 @@ function AuthImage({ fileId, accessToken, alt, className, style, onClick }) {
 
 
 export default function App() {
+  const handleDownload = async (photo) => {
+    try {
+      const url = photo.src || photo.thumbSrc || `https://drive.google.com/thumbnail?id=${photo.id}&sz=w2000`;
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `${photo.name || 'foto_keluarga'}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      alert("❌ Gagal mengunduh foto.");
+    }
+  };
+
   // --- Vault Auth ---
   const [inputPassword, setInputPassword] = useState('');
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -437,12 +456,21 @@ export default function App() {
         <div className="lightbox-overlay" onClick={() => setLightboxPhoto(null)}>
           <button className="lightbox-close"><X size={20}/></button>
           <img className="lightbox-img"
-            src={lightboxPhoto.src || lightboxPhoto.dataUrl}
+            src={lightboxPhoto.src || lightboxPhoto.dataUrl || `https://drive.google.com/thumbnail?id=${lightboxPhoto.id}&sz=w2000`}
             alt={lightboxPhoto.name}
             onClick={e => e.stopPropagation()}
           />
-          <div className="lightbox-caption">
-            {lightboxPhoto.albumName && lightboxPhoto.albumName !== 'LEBARAN' ? lightboxPhoto.albumName : lightboxPhoto.name}
+          <div style={{ position: 'absolute', bottom: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleDownload(lightboxPhoto); }}
+              className="btn btn-primary"
+              style={{ padding: '12px 24px', borderRadius: '99px', display: 'flex', gap: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}
+            >
+              <Download size={18}/> Simpan ke HP
+            </button>
+            <div className="lightbox-caption" style={{ position: 'relative', bottom: '0', transform: 'none' }}>
+              {lightboxPhoto.albumName && lightboxPhoto.albumName !== 'LEBARAN' ? lightboxPhoto.albumName : lightboxPhoto.name}
+            </div>
           </div>
         </div>
       )}
@@ -450,9 +478,9 @@ export default function App() {
       {/* HEADER */}
       <header className="header">
         <div className="logo-section">
-          <div className="shield-icon-wrapper"><Shield size={20}/></div>
+          <div className="shield-icon-wrapper"><Heart size={20} fill="white"/></div>
           <div className="app-title-container">
-            <h1>Galeri Keluarga</h1>
+            <h1>Galeri Keluarga 👨‍👩‍👧‍👦</h1>
           </div>
         </div>
         <div className="header-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -478,9 +506,9 @@ export default function App() {
           <div className="lock-container">
             <form onSubmit={handleUnlock} style={{ display:'flex', flexDirection:'column', gap:18, width:'100%' }}>
               <div className="lock-header">
-                <Shield size={48} style={{ color: 'var(--primary)', marginBottom: 16 }} />
-                <h2 className="lock-title">Galeri Pribadi</h2>
-                <p className="lock-desc">Masukkan sandi keamanan untuk mengakses foto keluarga.</p>
+                <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>📸</div>
+                <h2 className="lock-title">Galeri Pribadi 🔒</h2>
+                <p className="lock-desc">Ketik sandi rahasia keluarga untuk masuk yaa!</p>
               </div>
               <div className="form-group">
                 <input
@@ -502,8 +530,8 @@ export default function App() {
                 </p>
               )}
               <button type="submit" className="btn btn-primary" disabled={unlocking}
-                style={{ width:'100%', padding:14, fontSize:'1rem' }}>
-                {unlocking ? 'Memeriksa...' : 'Buka Galeri'}
+                style={{ width:'100%', padding:16, fontSize:'1.1rem', borderRadius: 99 }}>
+                {unlocking ? 'Membuka...' : 'Buka Galeri 🔓'}
               </button>
             </form>
           </div>
@@ -524,8 +552,8 @@ export default function App() {
               <>
                 <div className="vault-header-bar">
                   <div>
-                    <p style={{ fontWeight:700, fontSize:'1.1rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Image size={18}/> {allPhotos.length} Foto Tersimpan
+                    <p style={{ fontWeight:800, fontSize:'1.2rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      📸 {allPhotos.length} Foto Tersimpan
                     </p>
                   </div>
                   <div className="vault-status-badge">
@@ -536,11 +564,11 @@ export default function App() {
                 {/* Filter tabs */}
                 <div className="filters-bar">
                   {[
-                    { key:'SEMUA', label:'Semua' },
-                    { key:'LEBARAN', label:'Lebaran' },
-                    { key:'LIBURAN', label:'Liburan' },
-                    { key:'PERNIKAHAN', label:'Pernikahan' },
-                    { key:'LAIN', label:'Lainnya' },
+                    { key:'SEMUA', label:'📷 Semua' },
+                    { key:'LEBARAN', label:'🌙 Lebaran' },
+                    { key:'LIBURAN', label:'✈️ Liburan' },
+                    { key:'PERNIKAHAN', label:'💍 Pernikahan' },
+                    { key:'LAIN', label:'📁 Lainnya' },
                   ].map(({ key, label }) => (
                     <button key={key} onClick={() => setSelectedCategory(key)}
                       className={`filter-tab ${selectedCategory === key ? 'active' : ''}`}>
@@ -552,9 +580,9 @@ export default function App() {
                 {/* Photo grid */}
                 {filteredPhotos.length === 0 ? (
                   <div className="empty-state">
-                    <ImageOff size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
+                    <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🖼️</div>
                     <h3>Album Kosong</h3>
-                    <p>Tidak ada foto dalam kategori ini.</p>
+                    <p>Belum ada foto di sini. Tekan tombol <strong>+</strong> di bawah untuk menambah foto.</p>
                   </div>
                 ) : (
                   <div className="photo-grid">
@@ -590,11 +618,11 @@ export default function App() {
           <div className="upload-sheet-overlay" onClick={() => setShowUploadSheet(false)}>
             <div className="upload-sheet" onClick={e => e.stopPropagation()}>
               <div className="sheet-handle"/>
-              <h3 style={{ fontWeight:700, fontSize:'1.1rem' }}>Unggah Foto</h3>
+              <h3 style={{ fontWeight:800, fontSize:'1.2rem' }}>📤 Tambah Foto</h3>
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Pilih Album:</label>
+                <label className="form-label" style={{ fontSize: '0.9rem', fontWeight: 700 }}>Pilih Album:</label>
                 <div className="category-select-grid">
-                  {[['LEBARAN','Lebaran'],['LIBURAN','Liburan'],['PERNIKAHAN','Pernikahan'],['LAIN','Lainnya']].map(([cat,label]) => (
+                  {[['LEBARAN','🌙 Lebaran'],['LIBURAN','✈️ Liburan'],['PERNIKAHAN','💍 Pernikahan'],['LAIN','📁 Lainnya']].map(([cat,label]) => (
                     <button key={cat} type="button"
                       onClick={() => setUploadCategory(cat)}
                       className={`btn-select-category ${uploadCategory === cat ? 'active' : ''}`}>
@@ -620,7 +648,7 @@ export default function App() {
 
       </main>
 
-      <footer className="footer">Dibuat untuk keluarga tercinta</footer>
+      <footer className="footer">❤️ Dibuat dengan kasih sayang untuk keluarga</footer>
     </div>
   );
 }
