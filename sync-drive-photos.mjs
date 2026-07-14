@@ -18,7 +18,7 @@ import { join, dirname } from 'path';
 // KONFIGURASI - Isi ini sesuai punya kamu
 // ============================================================
 const FOLDER_ID = '1rvEOVGK93P2eYwnOO2FFB-_fpndCTqVo';
-const GOOGLE_API_KEY = 'ISI_API_KEY_KAMU_DI_SINI'; // Buat di: console.cloud.google.com
+const GOOGLE_API_KEY = 'AIzaSyCrjrM4yaN7BCuSl0CrixIbJpIX8sBUgQE'; // Buat di: console.cloud.google.com
 // ============================================================
 
 async function fetchFilesFromFolder(folderId, apiKey, albumName = 'LEBARAN') {

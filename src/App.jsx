@@ -414,324 +414,199 @@ export default function App() {
     selectedCategory === 'SEMUA' || p.category === selectedCategory
   );
 
+  const [showUploadSheet, setShowUploadSheet] = React.useState(false);
+
   return (
     <div className="app-container">
-      {/* Lightbox */}
-      {lightboxPhoto && (
-        <div onClick={() => setLightboxPhoto(null)} style={{
-          position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.93)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'zoom-out', animation: 'fadeIn 0.2s ease', padding: 16
-        }}>
-          <button onClick={() => setLightboxPhoto(null)} style={{
-            position: 'absolute', top: 20, right: 24, background: 'rgba(255,255,255,0.12)',
-            border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
-            width: 44, height: 44, color: '#fff', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}><X size={20}/></button>
-          <img src={lightboxPhoto.src || lightboxPhoto.dataUrl} alt={lightboxPhoto.name}
-            onClick={e => e.stopPropagation()}
-            style={{ maxWidth: '93vw', maxHeight: '90vh', borderRadius: 16,
-              boxShadow: '0 30px 80px rgba(0,0,0,0.8)', objectFit: 'contain', cursor: 'default' }}
-          />
-          <p style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-            color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', fontWeight: 600, textAlign: 'center',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80vw' }}>
-            {lightboxPhoto.name}
-          </p>
-        </div>
-      )}
 
-      {/* Client ID Setup Modal */}
-      {showClientIdSetup && (
-        <div onClick={() => setShowClientIdSetup(false)} style={{
-          position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.65)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: 'var(--bg-card)', backdropFilter: 'blur(20px)',
-            border: '1px solid var(--border)', borderRadius: 24,
-            padding: 32, maxWidth: 520, width: '100%'
-          }}>
-            <h3 style={{ fontWeight: 800, marginBottom: 8 }}>⚙️ Setup Google OAuth Client ID</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: 6, lineHeight: 1.65 }}>
-              Untuk muat semua foto Drive otomatis, perlu <strong>OAuth 2.0 Client ID</strong>. Cara mendapatkannya:
-            </p>
-            <ol style={{ color: 'var(--text-muted)', fontSize: '0.85rem', paddingLeft: 20, marginBottom: 16, lineHeight: 2 }}>
-              <li>Buka <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" style={{ color: '#a855f7', fontWeight: 700 }}>console.cloud.google.com/apis/credentials</a></li>
-              <li>Klik <strong>"Create Credentials"</strong> → <strong>"OAuth 2.0 Client ID"</strong></li>
-              <li>Application type: <strong>Web application</strong></li>
-              <li>Authorized JavaScript origins: tambah <code style={{ background: 'rgba(168,85,247,0.15)', padding: '1px 6px', borderRadius: 4 }}>http://localhost:5173</code></li>
-              <li>Klik <strong>Create</strong> → Copy <strong>Client ID</strong>-nya</li>
-            </ol>
-            <input type="text" value={clientIdInput} onChange={e => setClientIdInput(e.target.value)}
-              placeholder="xxxxx.apps.googleusercontent.com" className="text-input"
-              style={{ fontFamily: 'monospace', fontSize: '0.85rem', marginBottom: 16 }} />
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={handleSaveClientId} className="btn btn-primary"
-                style={{ flex: 1, background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)' }}>
-                Simpan & Aktifkan
-              </button>
-              <button onClick={() => setShowClientIdSetup(false)} className="btn btn-outline" style={{ padding: '10px 16px' }}>
-                Batal
-              </button>
-            </div>
+      {/* LIGHTBOX */}
+      {lightboxPhoto && (
+        <div className="lightbox-overlay" onClick={() => setLightboxPhoto(null)}>
+          <button className="lightbox-close"><X size={20}/></button>
+          <img className="lightbox-img"
+            src={lightboxPhoto.src || lightboxPhoto.dataUrl}
+            alt={lightboxPhoto.name}
+            onClick={e => e.stopPropagation()}
+          />
+          <div className="lightbox-caption">
+            {lightboxPhoto.albumName && lightboxPhoto.albumName !== 'LEBARAN' ? lightboxPhoto.albumName : lightboxPhoto.name}
           </div>
         </div>
       )}
 
-      {/* Header */}
+      {/* HEADER */}
       <header className="header">
         <div className="logo-section">
-          <div className="shield-icon-wrapper" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)' }}>
-            <Heart size={24}/>
-          </div>
+          <div className="shield-icon-wrapper"><Heart size={22}/></div>
           <div className="app-title-container">
-            <h1>
-              Galeri Kenangan Keluarga Besar
-              <span className="e2e-badge" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)' }}>Privat</span>
-            </h1>
-            <p className="subtitle">Mengingat Momen Indah Bersama Secara Aman & Rahasia</p>
+            <h1>Galeri Keluarga <span className="e2e-badge">Privat</span></h1>
+            <p className="subtitle">Kenangan indah keluarga besar kita 💕</p>
           </div>
         </div>
         <div className="header-controls">
-          {isUnlocked && googleUser && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10,
-              background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)',
-              borderRadius: 12, padding: '6px 14px' }}>
-              <img src={googleUser.picture} alt="" style={{ width: 28, height: 28, borderRadius: '50%' }}/>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#22c55e' }}>{googleUser.name}</span>
-              <button onClick={handleGoogleSignOut} style={{ background: 'none', border: 'none',
-                color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Keluar</button>
-            </div>
-          )}
           {isUnlocked && (
-            <button onClick={handleLock} className="btn btn-danger" style={{ fontSize: '0.85rem', padding: '8px 16px' }}>
-              <LogOut size={16}/> <span>Kunci</span>
+            <button onClick={handleLock} className="btn btn-outline" style={{ fontSize:'0.82rem', padding:'8px 14px' }}>
+              <LogOut size={15}/> Kunci
             </button>
           )}
         </div>
       </header>
 
       <main style={{ flex: 1 }}>
-        {/* Lock Screen */}
+
+        {/* LOCK SCREEN */}
         {!isUnlocked && (
           <div className="lock-container">
-            <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
+            <form onSubmit={handleUnlock} style={{ display:'flex', flexDirection:'column', gap:18, width:'100%' }}>
               <div className="lock-header">
-                <div className="lock-icon-wrapper" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
-                  <KeyRound size={32}/>
+                <div className="lock-icon-wrapper">
+                  <span style={{ fontSize:'2rem' }}>📸</span>
                 </div>
-                <h2 className="lock-title">Pintu Masuk Keluarga</h2>
-                <p className="lock-desc">Masukkan kata sandi untuk melihat galeri foto keluarga.</p>
+                <h2 className="lock-title">Galeri Foto Keluarga</h2>
+                <p className="lock-desc">Masukkan kata sandi untuk melihat foto-foto keluarga 🏠</p>
               </div>
-              <div className="form-group" style={{ width: '100%' }}>
-                <input type={showPassword ? 'text' : 'password'} value={inputPassword}
-                  onChange={e => setInputPassword(e.target.value)} className="text-input"
-                  placeholder="Masukkan kata sandi..." style={{ textAlign: 'center', fontSize: '1.1rem' }}
-                  disabled={unlocking} autoFocus/>
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="reset-vault-link" style={{ marginTop: 8 }}>
-                  {showPassword ? 'Sembunyikan' : 'Tampilkan'}
+              <div className="form-group">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={inputPassword}
+                  onChange={e => setInputPassword(e.target.value)}
+                  className="text-input"
+                  placeholder="Ketik kata sandi di sini..."
+                  style={{ textAlign:'center', fontSize:'1.15rem' }}
+                  disabled={unlocking} autoFocus
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="reset-vault-link" style={{ textAlign:'center' }}>
+                  {showPassword ? '🙈 Sembunyikan' : '👁️ Tampilkan kata sandi'}
                 </button>
               </div>
-              {passwordError && <p style={{ color: 'var(--danger)', fontWeight: 'bold' }}>{passwordError}</p>}
+              {passwordError && (
+                <p style={{ color:'#ef4444', fontWeight:700, textAlign:'center', background:'#fee2e2', padding:10, borderRadius:10 }}>
+                  ❌ {passwordError}
+                </p>
+              )}
               <button type="submit" className="btn btn-primary" disabled={unlocking}
-                style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
-                {unlocking ? 'Membuka...' : 'Masuk ke Galeri 🔑'}
+                style={{ width:'100%', padding:16, fontSize:'1rem', borderRadius:14 }}>
+                {unlocking ? '⏳ Membuka...' : '🔓 Masuk Lihat Foto'}
               </button>
             </form>
           </div>
         )}
 
-        {/* Unlocked Dashboard */}
+        {/* GALLERY */}
         {isUnlocked && (
           <div className="vault-workspace">
-            <div className="vault-header-bar">
-              <div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>📸 Album Foto Keluarga Besar</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
-                  {publicLoading ? 'Memuat foto...' : allPhotos.length > 0
-                    ? `${allPhotos.length} foto tersedia`
-                    : 'Foto akan segera muncul...'}
-                  {localFiles.length > 0 ? ` • ${localFiles.length} foto lokal` : ''}
-                </p>
-              </div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                <div className="vault-status-badge" style={{ color: '#ec4899', borderColor: 'rgba(236,72,153,0.2)', backgroundColor: 'rgba(236,72,153,0.1)' }}>
-                  <span className="status-dot" style={{ backgroundColor: '#ec4899', boxShadow: '0 0 8px #ec4899' }}></span>
-                  <span>Galeri Aktif</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Public photos loading */}
             {publicLoading && (
-              <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: 12, animation: 'pulse 1.5s ease infinite' }}>📸</div>
-                <p style={{ fontWeight: 700 }}>Memuat foto keluarga...</p>
-              </div>
-            )}
-            {publicError && (
-              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 14, padding: '14px 20px', marginBottom: 20 }}>
-                <span style={{ color: 'var(--danger)', fontWeight: 700, fontSize: '0.9rem' }}>⚠️ {publicError}</span>
+              <div style={{ textAlign:'center', padding:'64px 0' }}>
+                <div style={{ fontSize:'3rem', marginBottom:12 }}>⏳</div>
+                <p style={{ fontWeight:700, color:'var(--text-muted)' }}>Memuat foto keluarga...</p>
               </div>
             )}
 
-            {/* Drive error (admin only) */}
-            {driveError && !driveLoading && (
-              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 14, padding: '14px 20px', marginBottom: 20, display: 'flex', gap: 12,
-                alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                <span style={{ color: 'var(--danger)', fontWeight: 700, fontSize: '0.9rem' }}>⚠️ {driveError}</span>
-              </div>
-            )}
-
-            {/* Drive loading (admin only) */}
-            {driveLoading && (
-              <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: 12, animation: 'pulse 1.5s ease infinite' }}>📂</div>
-                <p style={{ fontWeight: 700 }}>Memuat foto dari Google Drive Anda...</p>
-              </div>
-            )}
-
-            <div className="vault-grid-layout">
-              {/* Upload Panel */}
-              <div className="upload-panel">
-
-
-                <h3 style={{ fontWeight: 800, color: '#ec4899', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Upload size={20}/> Upload Foto Lokal
-                </h3>
-                <div className="form-group" style={{ marginTop: 14 }}>
-                  <label className="form-label">Kategori Album:</label>
-                  <div className="category-select-grid">
-                    {['LEBARAN','LIBURAN','PERNIKAHAN','LAIN'].map(cat => (
-                      <button key={cat} type="button" onClick={() => setUploadCategory(cat)}
-                        className={`btn-select-category ${uploadCategory === cat ? 'active' : ''}`}
-                        style={uploadCategory === cat ? { background: 'linear-gradient(135deg, #ec4899, #db2777)', borderColor: '#ec4899' } : {}}>
-                        {cat === 'LAIN' ? 'Lainnya' : cat}
-                      </button>
-                    ))}
+            {!publicLoading && (
+              <>
+                <div className="vault-header-bar">
+                  <div>
+                    <p style={{ fontWeight:800, fontSize:'1.05rem' }}>
+                      📸 {allPhotos.length > 0 ? `${allPhotos.length} Foto Tersimpan` : 'Album Foto Keluarga'}
+                    </p>
+                    {allPhotos.length > 0 && (
+                      <p style={{ fontSize:'0.75rem', color:'var(--text-muted)', marginTop:2 }}>Ketuk foto untuk melihat lebih besar</p>
+                    )}
+                  </div>
+                  <div className="vault-status-badge">
+                    <span className="status-dot"></span> Aktif
                   </div>
                 </div>
-                <div className="form-group">
-                  <div className="dropzone" style={{ backgroundColor: 'rgba(236,72,153,0.08)', borderColor: '#ec4899' }}>
-                    <input type="file" accept="image/*" multiple onChange={handleFileUpload}
-                      className="dropzone-file-input" disabled={uploading}/>
-                    <div className="dropzone-icon-wrapper" style={{ color: '#ec4899' }}><Camera size={28}/></div>
-                    <div>
-                      <p style={{ fontWeight: 800, color: '#ec4899' }}>{uploading ? 'Mengenkripsi...' : 'Pilih Banyak Foto Sekaligus'}</p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>Bisa pilih banyak foto sekaligus</p>
-                    </div>
-                  </div>
-                </div>
-                {uploadProgress && <p style={{ color: '#a855f7', fontWeight: 'bold', fontSize: '0.85rem', textAlign: 'center' }}>{uploadProgress}</p>}
-                {uploadError && <p style={{ color: 'var(--danger)', fontWeight: 'bold', fontSize: '0.85rem' }}>{uploadError}</p>}
-              </div>
 
-              {/* Photos Grid */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {/* Filter tabs */}
                 <div className="filters-bar">
-                  {['SEMUA','LEBARAN','LIBURAN','PERNIKAHAN','LAIN'].map(cat => (
-                    <button key={cat} onClick={() => setSelectedCategory(cat)}
-                      className={`filter-tab ${selectedCategory === cat ? 'active' : ''}`}
-                      style={selectedCategory === cat ? { background: 'linear-gradient(135deg, #ec4899, #db2777)' } : {}}>
-                      {cat === 'SEMUA' ? `Semua (${allPhotos.length})` : cat === 'LAIN' ? 'Lainnya' : `${cat} (${allPhotos.filter(p => p.category === cat).length})`}
+                  {[
+                    { key:'SEMUA', label:'📷 Semua' },
+                    { key:'LEBARAN', label:'🌙 Lebaran' },
+                    { key:'LIBURAN', label:'✈️ Liburan' },
+                    { key:'PERNIKAHAN', label:'💍 Pernikahan' },
+                    { key:'LAIN', label:'📁 Lainnya' },
+                  ].map(({ key, label }) => (
+                    <button key={key} onClick={() => setSelectedCategory(key)}
+                      className={`filter-tab ${selectedCategory === key ? 'active' : ''}`}>
+                      {label}
                     </button>
                   ))}
                 </div>
 
-                {filteredPhotos.length === 0 && !driveLoading ? (
-                  <div className="empty-state-card">
-                    <div className="empty-icon-wrapper" style={{ color: '#ec4899', backgroundColor: 'rgba(236,72,153,0.1)' }}>
-                      <FolderOpen size={32}/>
-                    </div>
-                    <h3 style={{ fontWeight: 800 }}>Belum Ada Foto</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: 340 }}>
-                      {publicLoading ? 'Sedang memuat...' : 'Foto keluarga akan muncul di sini setelah diupload.'}
-                    </p>
+                {/* Photo grid */}
+                {filteredPhotos.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="emoji">🖼️</div>
+                    <h3>Belum ada foto</h3>
+                    <p>Foto keluarga akan muncul di sini. Tekan tombol <strong>+</strong> di bawah kanan untuk tambah foto.</p>
                   </div>
                 ) : (
-                  <div className="docs-grid-container">
+                  <div className="photo-grid">
                     {filteredPhotos.map(photo => (
-                      <div key={photo.id} className="document-item-card animate-fade-in">
-                        <div className="doc-preview-area" onClick={() => setLightboxPhoto(photo)} style={{ cursor: 'zoom-in' }}>
-                        {/* Photo image rendering based on source */}
-                          {photo.source === 'drive' && googleToken ? (
-                            <AuthImage
-                              fileId={photo.id}
-                              accessToken={googleToken}
-                              alt={photo.name}
-                              className="doc-preview-img"
-                            />
-                          ) : (
-                            <img
-                              src={photo.thumbSrc || photo.src || photo.dataUrl}
-                              alt={photo.name}
-                              className="doc-preview-img"
-                              loading="lazy"
-                            />
-                          )}
-                          <div className="photo-overlay" style={{
-                            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            transition: 'background 0.25s', borderRadius: 'inherit'
-                          }}>
-                            <ZoomIn size={32} color="white" className="zoom-icon" style={{ opacity: 0, transition: 'opacity 0.25s' }}/>
-                          </div>
-                          <span className="doc-category-badge" style={{
-                            background: photo.source === 'drive'
-                              ? 'linear-gradient(135deg, #4285F4, #34A853)'
-                              : 'linear-gradient(135deg, #ec4899, #db2777)'
-                          }}>
-                            {photo.source === 'drive' ? '☁️ Drive' : photo.category}
-                          </span>
-                        </div>
-                        <div className="doc-details-area">
-                          <div>
-                            <h4 className="doc-title" title={photo.name}>{photo.name}</h4>
-                            <p className="doc-meta" style={{ marginTop: 4 }}>
-                              {photo.createdTime || photo.dateAdded}
-                              {photo.size && photo.size !== '—' ? ` • ${photo.size}` : ''}
-                            </p>
-                          </div>
-                          <div className="doc-card-actions">
-                            {photo.source === 'local' ? (
-                              <>
-                                <a href={photo.dataUrl} download={photo.fileName} className="btn btn-outline"
-                                  style={{ flex: 1, padding: '8px 12px', fontSize: '0.82rem' }}>
-                                  <Download size={13}/> Unduh
-                                </a>
-                                <button onClick={() => handleDeleteLocal(photo.id, photo.name)} className="btn btn-danger"
-                                  style={{ padding: '8px 12px', backgroundColor: 'rgba(239,68,68,0.1)', color: 'var(--danger)' }}>
-                                  <Trash2 size={16}/>
-                                </button>
-                              </>
-                            ) : (
-                              <a href={photo.driveLink} target="_blank" rel="noopener noreferrer"
-                                className="btn btn-outline" style={{ flex: 1, padding: '8px 12px', fontSize: '0.82rem' }}>
-                                <ExternalLink size={13}/> Buka Drive
-                              </a>
-                            )}
-                          </div>
-                        </div>
+                      <div key={photo.id} className="photo-tile" onClick={() => setLightboxPhoto(photo)}>
+                        <img
+                          src={photo.thumbSrc || photo.src || photo.dataUrl}
+                          alt=""
+                          loading="lazy"
+                          onError={e => { e.target.style.opacity = '0'; }}
+                        />
+                        {photo.albumName && photo.albumName !== 'LEBARAN' && (
+                          <span className="photo-tile-badge">{photo.albumName}</span>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* FLOATING UPLOAD BUTTON */}
+        {isUnlocked && (
+          <button className="fab-upload" onClick={() => setShowUploadSheet(true)} title="Tambah Foto">
+            +
+          </button>
+        )}
+
+        {/* UPLOAD BOTTOM SHEET */}
+        {showUploadSheet && (
+          <div className="upload-sheet-overlay" onClick={() => setShowUploadSheet(false)}>
+            <div className="upload-sheet" onClick={e => e.stopPropagation()}>
+              <div className="sheet-handle"/>
+              <h3 style={{ fontWeight:800, fontSize:'1.1rem' }}>📤 Tambah Foto</h3>
+              <div className="form-group">
+                <label className="form-label">Pilih Album:</label>
+                <div className="category-select-grid">
+                  {[['LEBARAN','🌙 Lebaran'],['LIBURAN','✈️ Liburan'],['PERNIKAHAN','💍 Pernikahan'],['LAIN','📁 Lainnya']].map(([cat,label]) => (
+                    <button key={cat} type="button"
+                      onClick={() => setUploadCategory(cat)}
+                      className={`btn-select-category ${uploadCategory === cat ? 'active' : ''}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
+              <div className="dropzone">
+                <input type="file" accept="image/*" multiple
+                  onChange={async e => { await handleFileUpload(e); setShowUploadSheet(false); }}
+                  className="dropzone-file-input" disabled={uploading}/>
+                <div className="dropzone-icon-wrapper"><Camera size={26}/></div>
+                <p style={{ fontWeight:800, color:'var(--pink)' }}>{uploading ? '⏳ Menyimpan...' : '📷 Pilih Foto dari HP'}</p>
+                <p style={{ fontSize:'0.78rem', color:'var(--text-muted)' }}>Bisa pilih banyak foto sekaligus</p>
+              </div>
+              {uploadProgress && <p style={{ textAlign:'center', color:'var(--pink)', fontWeight:700 }}>{uploadProgress}</p>}
+              {uploadError && <p style={{ textAlign:'center', color:'#ef4444', fontWeight:700 }}>{uploadError}</p>}
+              <button onClick={() => setShowUploadSheet(false)} className="btn btn-outline" style={{ width:'100%' }}>Batal</button>
             </div>
           </div>
         )}
+
       </main>
 
-      <footer className="footer">
-        <p style={{ fontWeight: 'bold' }}>❤️ Dibuat dengan kasih sayang untuk keluarga besar kita.</p>
-        <p style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-          Galeri Lebaran 2026 · Foto Google Drive via OAuth2 · Data lokal dienkripsi AES-256
-        </p>
-      </footer>
+      <footer className="footer">❤️ Dibuat dengan kasih sayang untuk keluarga besar kita</footer>
     </div>
   );
 }
