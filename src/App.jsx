@@ -451,8 +451,8 @@ export default function App() {
 
                 <div className="relative z-10 flex flex-col gap-6">
                   <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg animate-float-slow">
-                      🤖
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg animate-float-slow">
+                      🦕
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 font-cute">AI Dino Assistant</h3>
